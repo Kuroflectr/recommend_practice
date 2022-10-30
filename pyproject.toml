@@ -1,0 +1,18 @@
+[tool.poetry]
+name = "recommend_practice"
+version = "0.1.0"
+description = ""
+authors = ["peihsuanlin5566 <jnes40722@gmail.com>"]
+readme = "README.md"
+packages = [{include = "practice"}]
+
+[tool.poetry.dependencies]
+python = "^3.9.5"
+pydantic = "^1.10.2"
+ipython = "^8.5.0"
+ipykernel = "^6.16.2"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
