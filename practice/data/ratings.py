@@ -1,3 +1,4 @@
+from distutils.msvccompiler import MSVCCompiler
 import os
 import csv
 from pydantic import BaseModel
@@ -34,13 +35,20 @@ class Ratings(BaseModel):
 
         return cls(rating_list=rating_list)
     
-    # def get_ratings(self, user_id):
-    #     all_rating_list = self.rating_list  
+    def get_ratings(self, user_id):
+        all_rating_list = self.rating_list  
+        rating_list = [ rating for rating in all_rating_list if rating.userId ==  user_id ]
 
+        return rating_list
+    
 
-    #     for rating in all_rating_list:
-    #         if rating.userId == user_id:
+    def get_ratings_by_movies(self, movie_id, user_id): 
+        user_ratings = self.get_ratings(user_id) 
+        ratings_dict = {rating.movieId: rating.rating for rating in user_ratings}
 
+        return ratings_dict[movie_id]
 
-
-    #     return rating_list
+        # all_rating_list = self.rating_list  
+        # ratings_by_movies = [ rating for rating in all_rating_list if (rating.userId ==  user_id) & (rating.movieId ==  movie_id) ]
+        # return ratings_by_movies 
+        

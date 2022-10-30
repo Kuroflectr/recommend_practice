@@ -31,3 +31,9 @@ class GenomeScores(BaseModel):
                 ))
 
         return cls(genomescore_list = genomescore_list )
+
+    def get_tags_by_movieid(self, movie_id):
+        all_genomescore_list = self.genomescore_list
+        tags = [ genomescore.tagId for genomescore in all_genomescore_list if genomescore.movieId == movie_id ]
+
+        return tags
