@@ -18,7 +18,7 @@ class GenomeScores(BaseModel):
 
     @classmethod
     def from_csv(cls): 
-        csv_file_path = DIR_PATH / 'data/csv/genome-scores.csv'
+        csv_file_path = DIR_PATH / 'csv/genome-scores.csv'
         
         with open(csv_file_path, 'r') as f: 
             reader = csv.DictReader(f)

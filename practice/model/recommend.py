@@ -1,7 +1,6 @@
 from practice.data.ratings import Ratings
 from practice.data.genome_score import GenomeScores 
 
-
 class Recommend:
     def __init__(self):
         self.ratings = Ratings.from_csv()
@@ -35,4 +34,12 @@ class Recommend:
 
         return rt
     
-    # def  equation2(): 
+    def  equation2(self, user_id): 
+
+        rt = self.equation_1(user_id)
+        user_ratings = self.ratings.get_ratings(user_id)
+        user_ratings_ratings = [rating.rating for rating in user_ratings]
+        r_mu = sum(user_ratings_ratings)/len(user_ratings_ratings)
+        
+        wt = rt -  r_mu
+        return wt 
