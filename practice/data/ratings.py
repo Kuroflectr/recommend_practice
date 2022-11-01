@@ -20,6 +20,7 @@ class Ratings(BaseModel):
     rating_by_user: dict[int, list[Rating]] = {}
     user_list: list[int] = []
     movieid_list: list[int] = []
+    unrated_movieid_list: dict[int, list[Rating]] = {}
 
     @classmethod
     def from_csv(cls): 
@@ -102,3 +103,13 @@ class Ratings(BaseModel):
             ratings_matrix[ind_user, ind_movie]  = rating_list_item.rating
 
         return ratings_matrix
+
+    def set_unrated_movie_id(self): 
+        ratings_matrix = self.get_ratings_matrix()
+
+        if self.unrated_movieid_list == {}: 
+            for i, rating_list_item in enumerate(self.rating_list) :
+                ratings_matrix_byuser = ratings_matrix[i, :]
+                self.unrated_movieid_list[rating_list_item.userId] = ratings_matrix_byuser[ratings_matrix_byuser == 0]
+        
+        
