@@ -3,6 +3,7 @@ import os
 import csv
 from pydantic import BaseModel
 from pathlib import Path
+import numpy as np 
 
 DIR_PATH = Path(os.path.dirname(os.path.abspath(__file__)))
 
@@ -17,6 +18,8 @@ class Rating(BaseModel):
 class Ratings(BaseModel): 
     rating_list: list[Rating]
     rating_by_user: dict[int, list[Rating]] = {}
+    user_list: list[int] = []
+    movieid_list: list[int] = []
 
     @classmethod
     def from_csv(cls): 
@@ -66,4 +69,36 @@ class Ratings(BaseModel):
         # all_rating_list = self.rating_list  
         # ratings_by_movies = [ rating for rating in all_rating_list if (rating.userId ==  user_id) & (rating.movieId ==  movie_id) ]
         # return ratings_by_movies 
+
+
+    def set_list(self):
+        if self.movieid_list == [] or self.user_list == []: 
+            # find how many users, movies are included
+            user_list = []
+            movieid_list = []
+            for rating_list_item in self.rating_list: 
+                if rating_list_item.userId not in user_list: 
+                    user_list.append(rating_list_item.userId)
+                if rating_list_item.movieId not in movieid_list: 
+                    movieid_list.append(rating_list_item.movieId)
+            self.user_list = np.array(user_list)
+            self.movieid_list = np.array(movieid_list)
+
+                
         
+    def get_ratings_matrix(self):  
+        self.set_list()        
+
+        user_num = len(self.user_list)
+        movie_num = len(self.movieid_list)
+
+        # create a null rating matrix
+        ratings_matrix = np.zeros([user_num, movie_num])
+
+        # fill in the values 
+        for rating_list_item in self.rating_list: 
+            ind_user = np.where(self.user_list == rating_list_item.userId)[0]
+            ind_movie = np.where(self.movieid_list == rating_list_item.userId)[0]
+            ratings_matrix[ind_user, ind_movie]  = rating_list_item.rating
+
+        return ratings_matrix
