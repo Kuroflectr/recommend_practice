@@ -32,7 +32,7 @@ class UserBasedRecommend( Recommend ):
 
         # extract the necessary cosine similiarty column 
         sim_user = self.sim_user
-        ind_user = np.where(self.ratings.user_list == user_id)
+        ind_user = np.where(self.ratings.user_list == user_id)[0]
         sim_user_user_id = sim_user[ind_user, :] # be aware that the first item is itself
 
         # extract the necessary movie rating column from rating matrix
@@ -42,11 +42,11 @@ class UserBasedRecommend( Recommend ):
         recommend_rating_list = np.zeros(len(unrated_movieid_list_user))
         for i, movieid in enumerate(unrated_movieid_list_user): 
             # extract the necessary movie rating column from rating matrix
-            ind_movie = np.where(self.ratings.movieid_list == movieid)
+            ind_movie = np.where(self.ratings.movieid_list == movieid)[0]
             ratings_matrix_user_id = ratings_matrix[:, ind_movie]
 
             raging_multiple = np.dot(sim_user_user_id, ratings_matrix_user_id)
-            recommend_rating_list[i] = raging_multiple/np.sum(sim_user_user_id)
+            recommend_rating_list[i] = (raging_multiple/np.sum(sim_user_user_id))[0]
         
         return unrated_movieid_list_user[recommend_rating_list.argmax()]
 

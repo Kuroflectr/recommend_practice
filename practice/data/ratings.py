@@ -124,9 +124,13 @@ class Ratings(BaseModel):
     def set_unrated_movie_id(self): 
         ratings_matrix = self.get_ratings_matrix()
 
+        # if self.unrated_movieid_list == {}: 
+        #     for rating_list_item in self.rating_list :
+        #         ratings_matrix_byuser = ratings_matrix[i, :]
+        #         self.unrated_movieid_list[rating_list_item.userId] = ratings_matrix_byuser[ratings_matrix_byuser == 0]
+        
         if self.unrated_movieid_list == {}: 
-            for rating_list_item in self.rating_list :
+            for i, user_id in enumerate(self.user_list): 
                 ratings_matrix_byuser = ratings_matrix[i, :]
-                self.unrated_movieid_list[rating_list_item.userId] = ratings_matrix_byuser[ratings_matrix_byuser == 0]
-        
-        
+                self.unrated_movieid_list[user_id] = np.array(self.movieid_list)[ratings_matrix_byuser == 0]
+                
