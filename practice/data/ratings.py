@@ -4,6 +4,9 @@ import csv
 from pydantic import BaseModel
 from pathlib import Path
 import numpy as np 
+import time
+
+
 
 DIR_PATH = Path(os.path.dirname(os.path.abspath(__file__)))
 
@@ -20,12 +23,14 @@ class Ratings(BaseModel):
     rating_by_user: dict[int, list[Rating]] = {}
     user_list: list[int] = []
     movieid_list: list[int] = []
-    unrated_movieid_list: dict[int, list[Rating]] = {}
+
+    # user_id: [unrated movie id list]
+    unrated_movieid_list: dict[int, list[int]] = {}
 
     @classmethod
     def from_csv(cls): 
-        # csv_file_path = DIR_PATH / "csv/ratings.csv"
-        csv_file_path = DIR_PATH / "csv/test_ratings.csv"
+        csv_file_path = DIR_PATH / "csv/ratings_s.csv"
+        # csv_file_path = DIR_PATH / "csv/test_ratings.csv"
 
 
         with open(csv_file_path, 'r') as f: 
@@ -75,13 +80,25 @@ class Ratings(BaseModel):
     def set_list(self):
         if self.movieid_list == [] or self.user_list == []: 
             # find how many users, movies are included
-            user_list = []
-            movieid_list = []
-            for rating_list_item in self.rating_list: 
-                if rating_list_item.userId not in user_list: 
-                    user_list.append(rating_list_item.userId)
-                if rating_list_item.movieId not in movieid_list: 
-                    movieid_list.append(rating_list_item.movieId)
+            # time1 = time.perf_counter()
+            user_list = np.unique( [rating_list_item.userId for rating_list_item in self.rating_list] ) 
+            # time2 = time.perf_counter()
+            
+            # print('user_list: {}'.format(time2-time1))
+            
+            
+            movieid_list = np.unique( [rating_list_item.movieId for rating_list_item in self.rating_list] ) 
+            # time3 = time.perf_counter()
+
+            # print('movie_list: {}'.format(time3-time2))
+
+            # user_list = np.unique()
+            # movieid_list = []
+            # for rating_list_item in self.rating_list: 
+            #     if rating_list_item.userId not in user_list: 
+            #         user_list.append(rating_list_item.userId)
+            #     if rating_list_item.movieId not in movieid_list: 
+            #         movieid_list.append(rating_list_item.movieId)
             self.user_list = np.array(user_list)
             self.movieid_list = np.array(movieid_list)
 
@@ -99,7 +116,7 @@ class Ratings(BaseModel):
         # fill in the values 
         for rating_list_item in self.rating_list: 
             ind_user = np.where(self.user_list == rating_list_item.userId)[0]
-            ind_movie = np.where(self.movieid_list == rating_list_item.userId)[0]
+            ind_movie = np.where(self.movieid_list == rating_list_item.movieId)[0]
             ratings_matrix[ind_user, ind_movie]  = rating_list_item.rating
 
         return ratings_matrix
@@ -108,7 +125,7 @@ class Ratings(BaseModel):
         ratings_matrix = self.get_ratings_matrix()
 
         if self.unrated_movieid_list == {}: 
-            for i, rating_list_item in enumerate(self.rating_list) :
+            for rating_list_item in self.rating_list :
                 ratings_matrix_byuser = ratings_matrix[i, :]
                 self.unrated_movieid_list[rating_list_item.userId] = ratings_matrix_byuser[ratings_matrix_byuser == 0]
         

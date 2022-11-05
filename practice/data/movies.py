@@ -19,8 +19,8 @@ class Movies(BaseModel):
 
     @classmethod
     def from_csv(cls): 
-        # csv_file_path = DIR_PATH / 'csv/movies.csv'
-        csv_file_path = DIR_PATH / 'csv/test_movies.csv'
+        csv_file_path = DIR_PATH / 'csv/movies_s.csv'
+        # csv_file_path = DIR_PATH / 'csv/test_movies.csv'
 
         
         with open(csv_file_path, 'r') as f: 

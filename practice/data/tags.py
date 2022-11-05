@@ -20,7 +20,7 @@ class Tags(BaseModel):
 
     @classmethod
     def from_csv(cls):
-        csv_file_path = DIR_PATH / "csv/tags.csv"
+        csv_file_path = DIR_PATH / "csv/tags_s.csv"
 
         with open(csv_file_path, "r") as f:
             reader = csv.DictReader(f)

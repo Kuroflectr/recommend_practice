@@ -9,10 +9,13 @@ import time
 class UserBasedRecommend( Recommend ): 
 
     def train(self): 
+        
         self.ratings.set_list()
         user_num = len(self.ratings.user_list) 
-        self.sim_user = np.array(user_num, user_num)
+        self.sim_user = np.zeros([user_num, user_num])
         
+        # breakpoint()
+
         ratings_matrix = self.ratings.get_ratings_matrix()
         # extract the vec which represents user1 and user2
         for i in range(user_num): 
@@ -24,6 +27,7 @@ class UserBasedRecommend( Recommend ):
 
 
     def recommend(self, user_id): 
+        # find the movie-id that was not rated by any user; we will predict these values: 
         self.ratings.set_unrated_movie_id() 
 
         # extract the necessary cosine similiarty column 
