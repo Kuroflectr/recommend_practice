@@ -55,4 +55,13 @@ class UserBasedRecommend( Recommend ):
 
         return cosine
 
+    def evaluate(self):
+        ratings_for_eva = Ratings.from_csv(csv_file_name='ratings.csv')
+        
+        # user_list = self.ratings.user_list
+    
+    
+    def DCG(self, order, rating):
+        
+        return (2**(rating)-1)/(np.log2(order+1)) 
     

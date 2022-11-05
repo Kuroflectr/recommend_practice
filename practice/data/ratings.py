@@ -28,8 +28,8 @@ class Ratings(BaseModel):
     unrated_movieid_list: dict[int, list[int]] = {}
 
     @classmethod
-    def from_csv(cls): 
-        csv_file_path = DIR_PATH / "csv/ratings_s.csv"
+    def from_csv(cls, csv_file_name="ratings_s.csv"): 
+        csv_file_path = DIR_PATH / f"csv/{csv_file_name}"
         # csv_file_path = DIR_PATH / "csv/test_ratings.csv"
 
 
