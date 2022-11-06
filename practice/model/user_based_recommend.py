@@ -64,11 +64,15 @@ class UserBasedRecommend( Recommend ):
 
         return cosine
 
-    # def evaluate(self): 
-        
+    def evaluate(self): 
+        # evaluated value: 0.8916
+        user_list = self.ratings.user_list
+        evaluate_value_list = [None] * len(user_list)
+        for i, user_id in enumerate(user_list): 
+            evaluate_value_by_user = self.evaluate_by_user(user_id)
+            evaluate_value_list[i] = evaluate_value_by_user
 
-
-    #     return
+        return np.array(evaluate_value_list).mean()
 
     def evaluate_by_user(self, user_id):
         self.ratings.set_rating_by_user()
