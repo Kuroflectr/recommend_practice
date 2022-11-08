@@ -1,6 +1,7 @@
 from statistics import variance
 from practice.data.ratings import Ratings
 from practice.data.genome_scores import GenomeScores 
+from practice.data.genome_tags import GenomeTags 
 from practice.model.recommend import Recommend
 import numpy as np 
 from numpy.linalg import norm
@@ -12,8 +13,8 @@ class UserBasedRecommend( Recommend ):
     def __init__(self):
         super().__init__()
     
-        self.genome_scores = GenomeScores.from_csv() # user-based doesnt use
-    
+        self.genome_scores = GenomeScores.from_csv() 
+        self.genome_tags =  GenomeTags.from_csv()
 
     def i_rated(self, user_id) -> int:
         user_ratings = self.ratings.get_ratings(user_id)
@@ -60,6 +61,8 @@ class UserBasedRecommend( Recommend ):
         return wt 
     
     def equation4(self, user_id, tag_id) -> float: 
+
+        #  U = cov * sig * |wt|
         
         cov = self.equation5(user_id, tag_id)
         sig = self.equation6(user_id, tag_id)
@@ -91,3 +94,11 @@ class UserBasedRecommend( Recommend ):
         n = len(data)
         mean = sum(data) / n
         return sum((x - mean) ** 2 for x in data) / (n - ddof)
+
+
+    def equation9(self, user_id ) -> int:
+        self.genome_tags.set_tagId_list()
+        tagId_list = self.genome_tags.tagId_list
+        s_list = [ self.equation4(user_id, tagId) for tagId in tagId_list ]
+
+        return np.argmax(s_list)

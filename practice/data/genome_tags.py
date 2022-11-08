@@ -13,7 +13,8 @@ class GenomeTag(BaseModel):
     
 
 class GenomeTags(BaseModel): 
-    genome_tag_list = list[GenomeTag]
+    genome_tag_list : list[GenomeTag] 
+    tagId_list : list[int] = []
     
     @classmethod
     def from_csv(cls): 
@@ -29,3 +30,11 @@ class GenomeTags(BaseModel):
                 ))
 
         return cls(genome_tag_list=genome_tag_list)
+    
+    def set_tagId_list(self): 
+        if self.tagId_list == []: 
+            tagId_list = [None]*len(self.genome_tag_list)
+            for i, genome_tag_list_item in enumerate(self.genome_tag_list): 
+                tagId_list[i] = genome_tag_list_item.tagId
+            self.tagId_list = tagId_list
+        
