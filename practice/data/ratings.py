@@ -23,6 +23,7 @@ class Ratings(BaseModel):
     rating_by_user: dict[int, list[Rating]] = {}
     user_list: list[int] = []
     movieid_list: list[int] = []
+    rating_by_movieid: dict[int, list[Rating]] = {}
 
     # user_id: [unrated movie id list]
     unrated_movieid_list: dict[int, list[int]] = {}
@@ -45,6 +46,19 @@ class Ratings(BaseModel):
                 ))
 
         return cls(rating_list=rating_list)
+        
+    def set_rating_by_movie(self,):
+        if len(self.rating_by_movieid) == 0:
+            all_rating_list = self.rating_list  
+            for rating_item in all_rating_list: 
+                if rating_item.movieId not in self.rating_by_movieid: 
+                    self.rating_by_movieid[rating_item.movieId] =  []
+                self.rating_by_movieid[rating_item.movieId].append(rating_item)
+    
+    def get_ratings_by_movieid(self, movie_id):
+        self.set_rating_by_movie() 
+
+        return self.rating_by_movieid.get(movie_id) 
 
     def set_rating_by_user(self,):
         if len(self.rating_by_user) == 0:

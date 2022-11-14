@@ -17,9 +17,10 @@ class Movie(BaseModel):
 class Movies(BaseModel): 
     movie_list: list[Movie]
 
+
     @classmethod
-    def from_csv(cls): 
-        csv_file_path = DIR_PATH / 'csv/movies_s.csv'
+    def from_csv(cls, csv_file_name='csv/movies_s.csv'): 
+        csv_file_path = DIR_PATH / csv_file_name
         # csv_file_path = DIR_PATH / 'csv/test_movies.csv'
 
         
@@ -34,3 +35,4 @@ class Movies(BaseModel):
                 ))
 
         return cls(movie_list = movie_list )
+
