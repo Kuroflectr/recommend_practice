@@ -62,7 +62,6 @@ class PreferenceRecommend( Recommend ):
     
         return len([ 1  for rating_item in  rating_by_movieid if rating_item.rating > 3  ]) 
 
-
     def ni_minus(self, movie_id) -> float: 
         rating_by_movieid = self.ratings.get_ratings_by_movieid(movie_id)
     
@@ -140,11 +139,32 @@ class PreferenceRecommend( Recommend ):
 
         return ( wit + mu*it/ i ) / ( mu + i/it)
 
+    def equation18(self, user_id, k=5) -> list:
+        tagId_list = self.genome_tags.tagId_list
+        U_list = [ self.equation4(user_id, tagId) for tagId in tagId_list] 
+        
+        tagId_u_dict = {}
+        for u, tagId in zip(U_list, tagId): 
+            tagId_u_dict[u] = tagId    
+        sorted_dict = sorted(tagId_u_dict.items(), key=lambda item: -item[1])
+    
+        return [v[0] for v in sorted_dict[:k]]
+
+    def equation19(self, user_id, tag_id) -> float: 
+        # calculate wtu
+        T_list = self.equation18(user_id, k=5)
+        if tag_id in T_list: 
+            return self.equation2(user_id)[tag_id]
+        return 0
+
 
     def equation22(self, user_id, movie_id ): 
         ni_plus = self.ni_plus(movie_id)
         ni_minus = self.ni_minus(movie_id)
+        top_k_pref_tag = self.equation18(self, user_id)
+        lin_list = [  self.equation19(user_id, tag_id)* np.log(self.equation17(movie_id, tag_id)) for tag_id in top_k_pref_tag]
+        user_num = len(self.ratings.user_list)
 
-        ...
-        
-    
+        rank = np.log(ni_plus+1) - np.log(user_num + 1 - ni_minus)  + sum(lin_list)
+
+        return rank
