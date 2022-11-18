@@ -17,6 +17,18 @@ class PreferenceRecommend( Recommend ):
         self.genome_scores = GenomeScores.from_csv() 
         self.genome_tags =  GenomeTags.from_csv()
         
+    def train(self): 
+
+
+        # self.
+
+        ...
+    def recommend(self, user_id):
+
+        return
+
+    
+
 
     def i_rated(self, user_id) -> int:
         user_ratings = self.ratings.get_ratings(user_id)
@@ -76,7 +88,7 @@ class PreferenceRecommend( Recommend ):
 
         return rt
     
-    def equation2(self, user_id) -> dict: 
+    def equation2(self, user_id) -> dict[int, float]: 
 
         rt = self.equation1(user_id)
         user_ratings = self.ratings.get_ratings(user_id)
@@ -90,8 +102,8 @@ class PreferenceRecommend( Recommend ):
         return wt 
     
     def equation4(self, user_id, tag_id) -> float: 
-
         #  U = cov * sig * |wt|
+        # importance of the tags
         
         cov = self.equation5(user_id, tag_id)
         sig = self.equation6(user_id, tag_id)
@@ -102,6 +114,7 @@ class PreferenceRecommend( Recommend ):
     
     def equation5(self, user_id, tag_id) -> float: 
 
+
         i   = self.i_rated(user_id)
         it  = self.it_rated( user_id, tag_id)
         
@@ -110,16 +123,20 @@ class PreferenceRecommend( Recommend ):
     
     def equation6(self, user_id, tag_id) -> float:
         
-        wt_abs = abs(self.equation2(user_id)[tag_id]) 
+        wt_abs = abs(self.equation2(user_id).get(tag_id, 0)) 
         
-        Rt = self.rt_vec(user_id)[tag_id]
+        Rt = self.rt_vec(user_id).get(tag_id, 0)
         sigma_t = self.variance(Rt)
         it = self.it_rated( user_id, tag_id)
-        
+
+        if sigma_t == 0 or it ==0: 
+            return 0
         return min(  [2, wt_abs/(sigma_t/np.sqrt(it))] )
 
 
     def variance(self, data, ddof=0) -> float:
+        if len(data) == 0: 
+            return 99999
         n = len(data)
         mean = sum(data) / n
         return sum((x - mean) ** 2 for x in data) / (n - ddof)
