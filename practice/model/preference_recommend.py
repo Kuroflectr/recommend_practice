@@ -36,11 +36,23 @@ class PreferenceRecommend( Recommend ):
                 self.U_by_user_tag_matrix[i, j] = U_user_tag
 
 
-    def recommend(self, user_id):
+    def recommend(self, user_id, tag_k=5, movie_k=5) -> list:
+        # extract the necessary U matrix which is derived via .train() 
+        # U_by_user_tag_matrix = self.U_by_user_tag_matrix
 
-        return
+        # find the top-k recommended tags list
+        rank_k_tags_list = self.equation18_recommend(user_id, tag_k)
 
-    
+        # derive the score for recommendation (log(O)): 
+        unrated_movieid_list_user = np.array(self.ratings.unrated_movieid_list[user_id])
+
+        movieId_score_dict = {}
+        for movie_id in unrated_movieid_list_user: 
+            movieId_score_dict[movie_id] = self.equation22(user_id, movie_id, rank_k_tags_list)
+
+        sorted_movieId_score_dict  = sorted(movieId_score_dict.items(), key=lambda item: -item[1])
+        # sorted_dict: [(2, 9), (3, 4), (4, 2), (1, 1)]
+        return  [v[0] for v in sorted_movieId_score_dict[:movie_k]]
 
 
     def i_rated(self, user_id) -> int:
@@ -180,6 +192,22 @@ class PreferenceRecommend( Recommend ):
         sorted_dict = sorted(tagId_u_dict.items(), key=lambda item: -item[1])
     
         return [v[0] for v in sorted_dict[:k]]
+    
+    def equation18_recommend(self, user_id, k=5 ) -> list:
+
+        user_id_ind = np.where(user_id == self.ratings.user_list)[0]
+        U_list = self.U_by_user_tag_matrix[:, user_id_ind]
+        
+        tagId_u_dict = {}
+        for u, tagId in zip(U_list, tagId): 
+            tagId_u_dict[u] = tagId    
+        sorted_dict = sorted(tagId_u_dict.items(), key=lambda item: -item[1])
+    
+        return [v[0] for v in sorted_dict[:k]]
+
+
+
+
 
     def equation19(self, user_id, tag_id) -> float: 
         # calculate wtu p
@@ -189,11 +217,12 @@ class PreferenceRecommend( Recommend ):
         return 0
 
 
-    def equation22(self, user_id, movie_id ): 
+    def equation22(self, user_id, movie_id, tagId_list ) -> float:  
+        # return the score that would be used in ranking of recommendation
         ni_plus = self.ni_plus(movie_id)
         ni_minus = self.ni_minus(movie_id)
-        top_k_pref_tag = self.equation18(self, user_id)
-        lin_list = [  self.equation19(user_id, tag_id)* np.log(self.equation17(movie_id, tag_id)) for tag_id in top_k_pref_tag]
+        # top_k_pref_tag = self.equation18(self, user_id)
+        lin_list = [  self.equation19(user_id, tag_id)* np.log(self.equation17(movie_id, tag_id)) for tag_id in tagId_list]
         user_num = len(self.ratings.user_list)
 
         rank = np.log(ni_plus+1) - np.log(user_num + 1 - ni_minus)  + sum(lin_list)
