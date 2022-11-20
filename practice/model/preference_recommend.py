@@ -18,11 +18,24 @@ class PreferenceRecommend( Recommend ):
         self.genome_tags =  GenomeTags.from_csv()
         
     def train(self): 
+        
+        if len(self.genome_tags.tagId_list) == 0: 
+            self.genome_tags.set_tagId_list()
+        
+        if len(self.ratings.user_list) == 0: 
+            self.ratings.set_list()
+
+        tagId_list = self.genome_tags.tagId_list
+        userId_list = self.ratings.user_list
+
+        self.U_by_user_tag_matrix = np.zeros([len(tagId_list),len(userId_list)])
+        
+        for i, tag_id in enumerate(tagId_list): 
+            for j, user_id in enumerate(userId_list): 
+                U_user_tag = self.equation4(user_id, tag_id)
+                self.U_by_user_tag_matrix[i, j] = U_user_tag
 
 
-        # self.
-
-        ...
     def recommend(self, user_id):
 
         return
@@ -56,7 +69,7 @@ class PreferenceRecommend( Recommend ):
         return 0
 
 
-    def rt_vec(self, user_id) -> dict: 
+    def rt_vec(self, user_id) -> dict[int, list[float]]: 
         user_ratings = self.ratings.get_ratings(user_id)
         movie_ids = [ user_rating.movieId for user_rating in user_ratings ]
         rt = { }
@@ -80,6 +93,7 @@ class PreferenceRecommend( Recommend ):
         return len([ 1  for rating_item in  rating_by_movieid if rating_item.rating <= 3  ]) 
 
     def equation1(self, user_id ) -> dict:
+        # OK 
         rt_vec = self.rt_vec(user_id)
         rt = {}
         for tag_id in rt_vec.keys(): 
@@ -89,7 +103,7 @@ class PreferenceRecommend( Recommend ):
         return rt
     
     def equation2(self, user_id) -> dict[int, float]: 
-
+        # ok 
         rt = self.equation1(user_id)
         user_ratings = self.ratings.get_ratings(user_id)
         user_ratings_ratings = [rating.rating for rating in user_ratings]
@@ -104,6 +118,7 @@ class PreferenceRecommend( Recommend ):
     def equation4(self, user_id, tag_id) -> float: 
         #  U = cov * sig * |wt|
         # importance of the tags
+        # OK
         
         cov = self.equation5(user_id, tag_id)
         sig = self.equation6(user_id, tag_id)
@@ -113,8 +128,7 @@ class PreferenceRecommend( Recommend ):
 
     
     def equation5(self, user_id, tag_id) -> float: 
-
-
+        # OK
         i   = self.i_rated(user_id)
         it  = self.it_rated( user_id, tag_id)
         
@@ -125,7 +139,7 @@ class PreferenceRecommend( Recommend ):
         
         wt_abs = abs(self.equation2(user_id).get(tag_id, 0)) 
         
-        Rt = self.rt_vec(user_id).get(tag_id, 0)
+        Rt = self.rt_vec(user_id).get(tag_id, [])
         sigma_t = self.variance(Rt)
         it = self.it_rated( user_id, tag_id)
 
@@ -168,7 +182,7 @@ class PreferenceRecommend( Recommend ):
         return [v[0] for v in sorted_dict[:k]]
 
     def equation19(self, user_id, tag_id) -> float: 
-        # calculate wtu
+        # calculate wtu p
         T_list = self.equation18(user_id, k=5)
         if tag_id in T_list: 
             return self.equation2(user_id)[tag_id]
