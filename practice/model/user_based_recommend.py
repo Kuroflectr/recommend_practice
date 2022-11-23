@@ -26,7 +26,7 @@ class UserBasedRecommend( Recommend ):
                     self.sim_user[i,j] = self.cosine_similarity(user1_vec,user2_vec) 
 
 
-    def recommend_rating(self, user_id, ratings_matrix, predict_movie_id_list): 
+    def recommend_rating(self, user_id, ratings_matrix, predict_movie_id_list) -> list: 
 
         # extract the necessary cosine similiarty column 
         sim_user = self.sim_user

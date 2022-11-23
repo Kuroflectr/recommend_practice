@@ -54,6 +54,53 @@ class PreferenceRecommend( Recommend ):
         # sorted_dict: [(2, 9), (3, 4), (4, 2), (1, 1)]
         return  [v[0] for v in sorted_movieId_score_dict[:movie_k]]
 
+    def evaluate(self, tag_k=5, movie_k=5 ): 
+
+        user_list = self.ratings.user_list
+        evaluate_value_list = [None] * len(user_list)
+        for i, user_id in enumerate(user_list): 
+            evaluate_value_by_user = self.evaluate_by_user(user_id, 
+                                        tag_k=tag_k, movie_k=movie_k )
+            evaluate_value_list[i] = evaluate_value_by_user
+
+        return np.array(evaluate_value_list).mean()
+
+
+
+    def evaluate_by_user(self, user_id, tag_k=5, movie_k=5 ): 
+
+        rated_ratings_list_user = np.array([x.rating for x in self.ratings.rating_by_user[user_id]])
+
+        # calculate DCG true 
+        ranks_true = self.find_order(rated_ratings_list_user)
+        DCG_true = self.DCG(ranks_true, rated_ratings_list_user )
+
+        # calculate DCG predict
+        # find the top-k recommended tags list
+        rank_k_tags_list = self.equation18_recommend(user_id, tag_k)
+        rated_movieid_list_byuser = np.array([x.movieId for x in self.ratings.rating_by_user[user_id]])
+        movieId_score_dict = {}
+        for movie_id in rated_movieid_list_byuser: 
+            movieId_score_dict[movie_id] = self.equation22(user_id, movie_id, rank_k_tags_list)
+
+        sorted_movieId_score_dict  = sorted(movieId_score_dict.items(), key=lambda item: -item[1])
+        sorted_movieId_score = [v[1] for v in sorted_movieId_score_dict[:movie_k]]
+        ranks_predict = self.find_order(sorted_movieId_score)
+        DCG_predict = self.DCG(ranks_predict, rated_ratings_list_user)
+
+        DCG_value_byuser = DCG_predict.sum()/DCG_true.sum()
+        
+        return DCG_value_byuser
+
+
+    def DCG(self, order: np.array, rating: np.array) -> np.array:
+        return (2**(rating)-1)/(np.log2(order+1)) 
+
+    def find_order(self, array: np.array): 
+        temp = np.argsort(-array)
+        ranks = np.empty_like(temp)
+        ranks[temp] = np.arange(len(array))
+        return ranks+1
 
     def i_rated(self, user_id) -> int:
         user_ratings = self.ratings.get_ratings(user_id)
@@ -134,7 +181,7 @@ class PreferenceRecommend( Recommend ):
         
         cov = self.equation5(user_id, tag_id)
         sig = self.equation6(user_id, tag_id)
-        wt_abs = abs(self.equation2(user_id)[tag_id]) 
+        wt_abs = abs(self.equation2(user_id).get(tag_id) ) 
         
         return cov*sig*wt_abs
 
