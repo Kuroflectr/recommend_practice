@@ -35,10 +35,14 @@ class PreferenceRecommend( Recommend ):
         time4 = time.time()
         print('stamp3', time4-time3)
         self.U_by_user_tag_matrix = np.zeros([len(tagId_list),len(userId_list)])
-        for i, tag_id in enumerate(tagId_list): 
-            for j, user_id in enumerate(userId_list): 
-                U_user_tag = self.equation4(user_id, tag_id)
-                self.U_by_user_tag_matrix[i, j] = U_user_tag
+        # for i, tag_id in enumerate(tagId_list): 
+        #     for j, user_id in enumerate(userId_list): 
+        #         U_user_tag = self.equation4(user_id, tag_id)
+        #         self.U_by_user_tag_matrix[i, j] = U_user_tag
+
+        self.U_by_user_tag_matrix = self.equation4(
+                np.array(tagId_list), 
+                np.array(userId_list))
 
         time5 = time.time()
         print('stamp4', time5-time4)
@@ -110,8 +114,9 @@ class PreferenceRecommend( Recommend ):
         ranks[temp] = np.arange(len(array))
         return ranks+1
 
-    def i_rated(self, user_id) -> int:
-        user_ratings = self.ratings.get_ratings(user_id)
+    def i_rated(self, user_ids) -> int:
+        for user_id in user_ids: 
+            user_ratings = self.ratings.get_ratings(user_id)
         return len(user_ratings)
         
     def it_rated(self, user_id, tag_id) -> int: 
@@ -182,23 +187,23 @@ class PreferenceRecommend( Recommend ):
 
         return wt 
     
-    def equation4(self, user_id, tag_id) -> float: 
+    def equation4(self, user_ids: np.array, tag_ids: np.array) -> np.array: 
         #  U = cov * sig * |wt|
         # importance of the tags
         # OK
-        time_eq4_1= time.time()
-        cov = self.equation5(user_id, tag_id)
-        sig = self.equation6(user_id, tag_id)
-        wt_abs = abs(self.equation2(user_id).get(tag_id, 0) ) 
-        time_eq4_2 = time.time()
-        print('eq4:',time_eq4_2-time_eq4_1)
+        # time_eq4_1= time.time()
+        cov = self.equation5(user_ids, tag_ids)
+        sig = self.equation6(user_ids, tag_ids)
+        wt_abs = abs(self.equation2(user_ids).get(tag_ids, 0) ) 
+        # time_eq4_2 = time.time()
+        # print('eq4:',time_eq4_2-time_eq4_1)
         return cov*sig*wt_abs
 
     
-    def equation5(self, user_id, tag_id) -> float: 
+    def equation5(self, user_ids: np.array, tag_ids: np.array) -> np.array: 
         # OK
-        i   = self.i_rated(user_id)
-        it  = self.it_rated( user_id, tag_id)
+        i   = self.i_rated(user_ids)
+        it  = self.it_rated( user_ids, tag_ids)
         
         return min([  it/i , (i-it)/ i  ])
         
@@ -261,17 +266,12 @@ class PreferenceRecommend( Recommend ):
     
         return [v[0] for v in sorted_dict[:k]]
 
-
-
-
-
     def equation19(self, user_id, tag_id) -> float: 
         # calculate wtu p
         T_list = self.equation18(user_id, k=5)
         if tag_id in T_list: 
             return self.equation2(user_id)[tag_id]
         return 0
-
 
     def equation22(self, user_id, movie_id, tagId_list ) -> float:  
         # return the score that would be used in ranking of recommendation

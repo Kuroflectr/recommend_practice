@@ -6,10 +6,7 @@ from pathlib import Path
 import numpy as np 
 import time
 
-
-
 DIR_PATH = Path(os.path.dirname(os.path.abspath(__file__)))
-
 
 class Rating(BaseModel): 
     userId: int
@@ -17,7 +14,6 @@ class Rating(BaseModel):
     rating: float
     timestamp: int
     
-
 class Ratings(BaseModel): 
     rating_list: list[Rating]
     rating_by_user: dict[int, list[Rating]] = {}
@@ -32,7 +28,6 @@ class Ratings(BaseModel):
     def from_csv(cls, csv_file_name="ratings_s.csv"): 
         csv_file_path = DIR_PATH / f"csv/{csv_file_name}"
         # csv_file_path = DIR_PATH / "csv/test_ratings.csv"
-
 
         with open(csv_file_path, 'r') as f: 
             reader = csv.DictReader(f)
@@ -71,13 +66,8 @@ class Ratings(BaseModel):
 
     def get_ratings(self, user_id):
         self.set_rating_by_user() 
-
         return self.rating_by_user[user_id]
 
-        # all_rating_list = self.rating_list  
-        # rating_list = [ rating for rating in all_rating_list if rating.userId ==  user_id ]
-
-        # return rating_list
     
 
     def get_ratings_by_movies(self, movie_id, user_id): 
@@ -85,11 +75,6 @@ class Ratings(BaseModel):
         ratings_dict = {rating_line.movieId: rating_line.rating for rating_line in user_ratings}
 
         return ratings_dict[movie_id]
-
-        # all_rating_list = self.rating_list  
-        # ratings_by_movies = [ rating for rating in all_rating_list if (rating.userId ==  user_id) & (rating.movieId ==  movie_id) ]
-        # return ratings_by_movies 
-
 
     def set_list(self):
         if self.movieid_list == [] or self.user_list == []: 
