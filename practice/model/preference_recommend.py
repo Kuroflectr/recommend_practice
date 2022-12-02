@@ -18,22 +18,30 @@ class PreferenceRecommend( Recommend ):
         self.genome_tags =  GenomeTags.from_csv()
         
     def train(self): 
-        
+        time1 = time.time()
         if len(self.genome_tags.tagId_list) == 0: 
             self.genome_tags.set_tagId_list()
         
+        time2 = time.time()
+        print('stamp1', time2-time1)
         if len(self.ratings.user_list) == 0: 
             self.ratings.set_list()
 
+        time3 = time.time()
+        print('stamp2', time3-time2)
         tagId_list = self.genome_tags.tagId_list
         userId_list = self.ratings.user_list
 
+        time4 = time.time()
+        print('stamp3', time4-time3)
         self.U_by_user_tag_matrix = np.zeros([len(tagId_list),len(userId_list)])
-        
         for i, tag_id in enumerate(tagId_list): 
             for j, user_id in enumerate(userId_list): 
                 U_user_tag = self.equation4(user_id, tag_id)
                 self.U_by_user_tag_matrix[i, j] = U_user_tag
+
+        time5 = time.time()
+        print('stamp4', time5-time4)
 
 
     def recommend(self, user_id, tag_k=5, movie_k=5) -> list:
@@ -178,11 +186,12 @@ class PreferenceRecommend( Recommend ):
         #  U = cov * sig * |wt|
         # importance of the tags
         # OK
-        
+        time_eq4_1= time.time()
         cov = self.equation5(user_id, tag_id)
         sig = self.equation6(user_id, tag_id)
-        wt_abs = abs(self.equation2(user_id).get(tag_id) ) 
-        
+        wt_abs = abs(self.equation2(user_id).get(tag_id, 0) ) 
+        time_eq4_2 = time.time()
+        print('eq4:',time_eq4_2-time_eq4_1)
         return cov*sig*wt_abs
 
     

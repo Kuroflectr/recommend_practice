@@ -94,25 +94,16 @@ class Ratings(BaseModel):
     def set_list(self):
         if self.movieid_list == [] or self.user_list == []: 
             # find how many users, movies are included
-            # time1 = time.perf_counter()
-            user_list = np.unique( [rating_list_item.userId for rating_list_item in self.rating_list] ) 
-            # time2 = time.perf_counter()
-            
-            # print('user_list: {}'.format(time2-time1))
-            
-            
-            movieid_list = np.unique( [rating_list_item.movieId for rating_list_item in self.rating_list] ) 
-            # time3 = time.perf_counter()
+            user_list = [None]*len(self.rating_list)
+            movieid_list = [None]*len(self.rating_list)
 
-            # print('movie_list: {}'.format(time3-time2))
+            for i, rating_list_item in enumerate(self.rating_list): 
+                user_list[i] = rating_list_item.userId 
+                movieid_list[i] = rating_list_item.movieId 
 
-            # user_list = np.unique()
-            # movieid_list = []
-            # for rating_list_item in self.rating_list: 
-            #     if rating_list_item.userId not in user_list: 
-            #         user_list.append(rating_list_item.userId)
-            #     if rating_list_item.movieId not in movieid_list: 
-            #         movieid_list.append(rating_list_item.movieId)
+            user_list = list(set(user_list))
+            movieid_list = list(set(movieid_list))
+
             self.user_list = np.array(user_list)
             self.movieid_list = np.array(movieid_list)
 
